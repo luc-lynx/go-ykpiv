@@ -37,7 +37,7 @@ import (
 
 	"crypto"
 
-	"pault.ag/go/ykpiv/internal/pkcs1v15"
+	"github.com/paultag/go-ykpiv/internal/pkcs1v15"
 )
 
 // It's never a real party until you import both `unsafe`, *and* `crypto`.

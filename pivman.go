@@ -32,10 +32,8 @@ import "C"
 
 import (
 	"crypto"
-
+	"github.com/paultag/go-ykpiv/internal/bytearray"
 	"golang.org/x/crypto/pbkdf2"
-
-	"pault.ag/go/ykpiv/internal/bytearray"
 )
 
 var (

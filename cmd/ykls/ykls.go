@@ -23,7 +23,7 @@ package main
 import (
 	"fmt"
 
-	"pault.ag/go/ykpiv"
+	"github.com/paultag/go-ykpiv"
 )
 
 func ohshit(err error) {
