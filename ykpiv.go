@@ -26,8 +26,8 @@ package ykpiv
 /*
 #cgo darwin LDFLAGS: -L /usr/local/lib -lykpiv
 #cgo darwin CFLAGS: -I/usr/local/include/ykpiv/
-#cgo linux LDFLAGS: -lykpiv -Wl,--allow-multiple-definition
-#cgo linux CFLAGS: -I/usr/include/ykpiv/
+#cgo linux LDFLAGS: -L/usr/local/lib/ -Wl,-rpath,/usr/local/lib/ -lykpiv
+#cgo linux CFLAGS: -I/usr/include/ykpiv/ -I/usr/local/include/ykpiv/
 #include <ykpiv.h>
 #include <stdlib.h>
 */
