@@ -93,18 +93,43 @@ var (
 	InvalidObject       = Error{Code: C.YKPIV_INVALID_OBJECT, Message: "Invalid Object"}
 	AlgorithmError      = Error{Code: C.YKPIV_ALGORITHM_ERROR, Message: "Algorithm Error"}
 	PINLockedError      = Error{Code: C.YKPIV_PIN_LOCKED, Message: "PIN Locked"}
+	ArgumentError		= Error{Code: C.YKPIV_ARGUMENT_ERROR, Message: "Argument Error"}
+	RangeError			= Error{Code: C.YKPIV_RANGE_ERROR, Message: "Range Error"}
+	NotSupportedError	= Error{Code: C.YKPIV_NOT_SUPPORTED, Message: "Feature Not Supported"}
+
 
 	SecurityStatusError = Error{Code: C.SW_ERR_SECURITY_STATUS, Message: "Security Status Error"}
 	AuthBlocked         = Error{Code: C.SW_ERR_AUTH_BLOCKED, Message: "Auth Blocked"}
 	IncorrectParam      = Error{Code: C.SW_ERR_INCORRECT_PARAM, Message: "Incorrect Param"}
 	IncorrectSlot       = Error{Code: C.SW_ERR_INCORRECT_SLOT, Message: "Incorrect Slot"}
+	NotSupportedStatusError = Error{Code: C.SW_ERR_NOT_SUPPORTED, Message: "Not Supported Status Error"}
 
-	errorLookupMap = createErrorLookupMap(MemoryError, PCSCError, SizeError, AppletError,
-		AuthenticationError, RandomnessError, GenericError, KeyError, ParseError,
-		WrongPIN, InvalidObject, AlgorithmError, PINLockedError)
+	errorLookupMap = createErrorLookupMap(
+		MemoryError,
+		PCSCError,
+		SizeError,
+		AppletError,
+		AuthenticationError,
+		RandomnessError,
+		GenericError,
+		KeyError,
+		ParseError,
+		WrongPIN,
+		InvalidObject,
+		AlgorithmError,
+		PINLockedError,
+		ArgumentError,
+		RangeError,
+		NotSupportedError,
+	)
 
-	swErrorLookupMap = createErrorLookupMap(SecurityStatusError, AuthBlocked,
-		IncorrectParam, IncorrectSlot)
+	swErrorLookupMap = createErrorLookupMap(
+		SecurityStatusError,
+		AuthBlocked,
+		IncorrectParam,
+		IncorrectSlot,
+		NotSupportedStatusError,
+	)
 )
 
 // Take a ykpiv_rc return code and turn it into a ykpiv.Error.

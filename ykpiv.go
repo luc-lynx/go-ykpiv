@@ -227,9 +227,14 @@ func (y Yubikey) Login() error {
 		return err
 	}
 
+	return y.LoginWithPIN(pin)
+}
+
+func (y Yubikey) LoginWithPIN(pin string) error {
 	cPin := (*C.char)(C.CString(pin))
 	defer C.free(unsafe.Pointer(cPin))
-	_, err = y.verify(cPin)
+
+	_, err := y.verify(cPin)
 	return err
 }
 
@@ -326,14 +331,15 @@ func (y Yubikey) ChangePIN(oldPin, newPin string) error {
 // Use it with the attestation certificate in the Attestation slot
 // and the Yubico PIV Root CA certificate to verify attestation.
 func (y Yubikey) Attest(slotId SlotId) (*x509.Certificate, error) {
-	var cDataLen C.size_t = 4096
-	var cData *C.uchar = (*C.uchar)(C.malloc(4096))
-	defer C.free(unsafe.Pointer(cData))
+	const AttestDataLen = 2048 // taken from the original tool
+	data := make([]byte, AttestDataLen)
+	cData := (*C.uchar)(C.CBytes(data))
+	cDataLen := C.size_t(len(data))
 
 	if err := getError(C.ykpiv_attest(y.state, C.uchar(slotId.Key), cData, &cDataLen), "attest"); err != nil {
 		return nil, err
 	}
-	return x509.ParseCertificate(C.GoBytes(unsafe.Pointer(cData), C.int(cDataLen)))
+	return x509.ParseCertificate(data)
 }
 
 // Authenticate to the Yubikey using the Management Key. This key is a 24 byte
@@ -346,6 +352,13 @@ func (y Yubikey) Authenticate() error {
 	}
 
 	cKey := (*C.uchar)(C.CBytes(managementKey))
+	defer C.free(unsafe.Pointer(cKey))
+
+	return getError(C.ykpiv_authenticate(y.state, cKey), "authenticate")
+}
+
+func (y Yubikey) AuthenticateWithKey(key []byte) error {
+	cKey := (*C.uchar)(C.CBytes(key))
 	defer C.free(unsafe.Pointer(cKey))
 
 	return getError(C.ykpiv_authenticate(y.state, cKey), "authenticate")
@@ -395,6 +408,52 @@ func (y Yubikey) Reset() error {
 		return err
 	}
 	return getSWError(sw, "transfer_data")
+}
+
+type Algorithm int
+
+const (
+	AlgorithmRSA1024 Algorithm = iota
+	AlgorithmRSA2048
+
+)
+
+func (y Yubikey) GenerateKey(slotID SlotId) error {
+	var modulus []byte
+	var exp []byte
+	var point []byte
+
+	cModulus := (*C.uchar)(C.CBytes(modulus))
+	cModulusLen := C.size_t(len(modulus))
+	cExp := (*C.uchar)(C.CBytes(exp))
+	cExpLen := C.size_t(len(exp))
+	cPoint := (*C.uchar)(C.CBytes(point))
+	cPointLen := C.size_t(len(point))
+
+	//point :=  *C.uchar = new(C.uchar)
+	//var pointLen C.size_t
+
+	err := getError(C.ykpiv_util_generate_key(
+			y.state,
+			C.uchar(slotID.Key),
+			C.uchar(C.YKPIV_ALGO_ECCP256),
+			C.uchar(C.YKPIV_PINPOLICY_DEFAULT),
+			C.uchar(C.YKPIV_TOUCHPOLICY_DEFAULT),
+			&cModulus,
+			&cModulusLen,
+			&cExp,
+			&cExpLen,
+			&cPoint,
+			&cPointLen,
+		), "ykpiv_util_generate_key")
+
+	if err != nil {
+		return err
+	}
+	//defer C.ykpiv_util_free(y.state, unsafe.Pointer(modulus))
+	//defer C.ykpiv_util_free(y.state, unsafe.Pointer(exp))
+
+	return nil
 }
 
 // ImportKey function imports a private key to the specified slot
